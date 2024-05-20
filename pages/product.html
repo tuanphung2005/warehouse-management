@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>product page</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <style>
+        #side_bar a {
+            text-decoration: none;
+            color: white;
+        }
+        #side_bar a:hover {
+            color: white;
+            text-decoration: none;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid black;
+        }
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+        .rows div {
+            margin: 10px 0px 10px 0px;
+        }
+    </style>
+</head>
+<body>
+    <div id="wraper">
+        <div id="side_bar">
+            <table>
+                <ul>
+                    <li><a href="employee.html">Employee</a></li>
+                    <li><a href="customer.html">Customer</a></li>
+                    <li><a href="product.html">Product</a></li>
+                    <li><a href="order.html">Order</a></li>
+                    <li><a href="supplier.html">Supplier</a></li>
+                </ul>
+            </table>
+        </div>
+        <div id="content">
+            <div class="rows">
+                <h1>Products</h1>
+                <div>
+                    <a class="btn btn-danger"><i class="material-icons">&#xE15C;</i></a>
+                    <a class="btn btn-success"><i class="material-icons">&#xE147;</i></a>
+                </div>
+            </div>
+            <span id="info">info!!!</span>
+        </div>
+    </div>
+    <!-- Modal -->
+<div id="productModal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">products Details</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+
+          <form id="productForm">
+            <input type="hidden" id="productID" name="productID" value="">
+            <div class="form-group">
+              <label for="productName">Name</label>
+              <input type="text" class="form-control" id="productName" placeholder="Enter name">
+            </div>
+            <div class="form-group">
+              <label for="SupplierID">Supplier ID</label>
+              <input type="text" class="form-control" id="SupplierID" placeholder="Enter Supplier ID">
+            </div>
+            <div class="form-group">
+              <label for="Description">Description</label>
+              <input type="text" class="form-control" id="Description" placeholder="Enter Description">
+            </div>
+            <div class="form-group">
+              <label for="Price">Price</label>
+              <input type="number" class="form-control" id="Price" placeholder="Enter price">
+            </div>
+            <div class="form-group">
+                <label for="Quantity">Quantity</label>
+                <input type="number" class="form-control" id="Quantity" placeholder="Enter quantity">
+              </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="saveproduct">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+<script>
+    fetch('http://localhost:3300/getproduct')
+        .then(response => {
+            if (response.ok) {
+                return response.json(); 
+            }
+            throw new Error('Network response was not ok.');
+        })
+        .then(data => {
+
+            let tableHTML = "<table><tr><th>Product ID</th><th>Name</th><th>Supplier ID</th><th>Description</th><th>Price</th><th>Quantity</th><th>Actions</th></tr>";
+            data.forEach(product => {
+
+                tableHTML += `<tr>
+                    <td>${product.ProductID}</td>
+                    <td>${product.Name}</td>
+                    <td>${product.SupplierID}</td>
+                    <td>${product.Description}</td>
+                    <td>${product.Price}</td>
+                    <td>${product.Quantity}</td>
+                    <td>
+                        <a class="edit"><i class="material-icons" title="Edit">&#xE254;</i></a>
+                        <a class="delete"><i class="material-icons" title="Delete">&#xE872;</i></a>
+                    </td>
+                </tr>`;
+            });
+            tableHTML += "</table>";
+            document.getElementById('info').innerHTML = tableHTML;
+        })
+        .catch(error => {
+            console.error("There was a problem with your fetch operation:", error);
+        });
+
+    document.addEventListener('DOMContentLoaded', function() {
+    var modal = document.getElementById('productModal');
+    var btnAdd = document.querySelector('.btn-success');
+    var span = document.getElementsByClassName("close")[0];
+
+    btnAdd.onclick = function() {
+        modal.style.display = "block";
+        document.getElementById('saveproduct').addEventListener('click', function() {
+        const productData = {
+            name: document.getElementById('productName').value,
+            supplierid: document.getElementById('SupplierID').value,
+            description: document.getElementById('Description').value,
+            price: document.getElementById('Price').value,
+            quantity: document.getElementById('Quantity').value
+        };
+
+        fetch('http://localhost:3300/addproduct', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(productData),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text();
+        })
+        .then(() => {
+            console.log('product added successfully');
+            location.reload();
+        })
+        .catch((error) => {
+            console.error('There was a problem with your fetch operation:', error);
+        });
+        });
+    };
+
+    
+    document.getElementById('info').addEventListener('click', function(e) {
+    if (e.target.matches('.edit, .edit *')) {
+        var editButton = e.target.closest('.edit');
+        console.log('Edit button clicked');
+        var productRow = editButton.closest('tr');
+        var productID = productRow.getAttribute('data-product-id'); 
+        var productName = productRow.children[1].textContent;
+        var SupplierID = productRow.children[2].textContent;
+        var Description = productRow.children[3].textContent;
+        var Price = productRow.children[4].textContent;
+        var Quantity = productRow.children[5].textContent;
+        var productID = productRow.getAttribute('data-product-id'); 
+        document.getElementById('productID').value = productID;
+        modal.style.display = "block";
+        document.getElementById('productID').value = productID;
+        document.getElementById('productName').value = productName;
+        document.getElementById('SupplierID').value = SupplierID;
+        document.getElementById('Description').value = Description;
+        document.getElementById('Price').value = Price;
+        document.getElementById('Quantity').value = Quantity;
+
+        document.getElementById('saveproduct').addEventListener('click', function() {
+        var productID = productRow.children[0].textContent;
+        console.log(productID);
+        const productData = {
+            name: document.getElementById('productName').value,
+            supplierid: document.getElementById('SupplierID').value,
+            description: document.getElementById('Description').value,
+            price: document.getElementById('Price').value,
+            quantity: document.getElementById('Quantity').value
+        };
+        fetch(`http://localhost:3300/editproduct/${productID}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(productData),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text();
+        })
+        .then(() => {
+            console.log('product updated successfully');
+            modal.style.display = "none";
+            location.reload();
+        })
+        .catch((error) => {
+            console.error('There was a problem with your fetch operation:', error);
+        });
+});
+    }
+
+    if (e.target.matches('.delete, .delete *')) {
+        var deleteButton = e.target.closest('.delete');
+        console.log('Delete button clicked');
+        var productRow = deleteButton.closest('tr');
+        var productID = productRow.children[0].textContent;
+        fetch(`http://localhost:3300/deleteproduct/${productID}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text();
+        })
+        .then(() => {
+            console.log('product deleted successfully');
+            productRow.remove();
+        })
+        .catch((error) => {
+            console.error('There was a problem with your fetch operation:', error);
+        });
+    }
+
+});
+
+    span.onclick = function() {
+        modal.style.display = "none";
+    };
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    };
+
+
+    
+    console.log('DOM fully loaded and parsed');
+});
+
+</script>
+</html>

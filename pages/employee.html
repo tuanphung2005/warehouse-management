@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee page</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <style>
+        #side_bar a {
+            text-decoration: none;
+            color: white;
+        }
+        #side_bar a:hover {
+            color: white;
+            text-decoration: none;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid black;
+        }
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+        .rows div {
+            margin: 10px 0px 10px 0px;
+        }
+    </style>
+</head>
+<body>
+    <div id="wraper">
+        <div id="side_bar">
+            <table>
+                <ul>
+                    <li><a href="employee.html">Employee</a></li>
+                    <li><a href="customer.html">Customer</a></li>
+                    <li><a href="product.html">Product</a></li>
+                    <li><a href="order.html">Order</a></li>
+                    <li><a href="supplier.html">Supplier</a></li>
+                </ul>
+            </table>
+        </div>
+        <div id="content">
+            <div class="rows">
+                <h1>Employee</h1>
+                <div>
+                    <a class="btn btn-danger"><i class="material-icons">&#xE15C;</i></a>
+                    <a class="btn btn-success"><i class="material-icons">&#xE147;</i></a>
+                </div>
+            </div>
+            <span id="info">info!!!</span>
+        </div>
+    </div>
+
+    <div id="employeeModal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Employee Details</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="employeeForm">
+            <input type="hidden" id="employeeID" name="employeeID" value="">
+            <div class="form-group">
+              <label for="employeeName">Name</label>
+              <input type="text" class="form-control" id="employeeName" placeholder="Enter name">
+            </div>
+            <div class="form-group">
+              <label for="employeePosition">Position</label>
+              <input type="text" class="form-control" id="employeePosition" placeholder="Enter position">
+            </div>
+            <div class="form-group">
+              <label for="employeePhone">Phone Number</label>
+              <input type="tel" class="form-control" id="employeePhone" placeholder="Enter phone number">
+            </div>
+            <div class="form-group">
+              <label for="employeeEmail">Email</label>
+              <input type="email" class="form-control" id="employeeEmail" placeholder="Enter email">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="saveEmployee">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+<script>
+    fetch('http://localhost:3300/getEmployee')
+        .then(response => {
+            if (response.ok) {
+                return response.json(); 
+            }
+            throw new Error('Network response was not ok.');
+        })
+        .then(data => {
+
+            let tableHTML = "<table><tr><th>Employee ID</th><th>Name</th><th>Position</th><th>Phone Number</th><th>Email</th><th>Actions</th></tr>";
+            data.forEach(employee => {
+
+                tableHTML += `<tr>
+                    <td>${employee.EmployeeID}</td>
+                    <td>${employee.Name}</td>
+                    <td>${employee.Position}</td>
+                    <td>${employee.PhoneNum}</td>
+                    <td>${employee.Email}</td>
+                    <td>
+                        <a class="edit"><i class="material-icons" title="Edit">&#xE254;</i></a>
+                        <a class="delete"><i class="material-icons" title="Delete">&#xE872;</i></a>
+                    </td>
+                </tr>`;
+            });
+            tableHTML += "</table>";
+            document.getElementById('info').innerHTML = tableHTML;
+        })
+        .catch(error => {
+            console.error("There was a problem with your fetch operation:", error);
+        });
+
+    document.addEventListener('DOMContentLoaded', function() {
+    var modal = document.getElementById('employeeModal');
+    var btnAdd = document.querySelector('.btn-success');
+    var span = document.getElementsByClassName("close")[0];
+
+    btnAdd.onclick = function() {
+        modal.style.display = "block";
+        document.getElementById('saveEmployee').addEventListener('click', function() {
+        const employeeData = {
+            name: document.getElementById('employeeName').value,
+            position: document.getElementById('employeePosition').value,
+            phone: document.getElementById('employeePhone').value,
+            email: document.getElementById('employeeEmail').value
+        };
+
+        fetch('http://localhost:3300/addEmployee', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(employeeData),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text();
+        })
+        .then(() => {
+            console.log('Employee added successfully');
+
+            location.reload();
+        })
+        .catch((error) => {
+            console.error('There was a problem with your fetch operation:', error);
+        });
+        });
+    };
+
+    
+
+    document.getElementById('info').addEventListener('click', function(e) {
+
+    if (e.target.matches('.edit, .edit *')) {
+
+        var editButton = e.target.closest('.edit');
+        console.log('Edit button clicked');
+
+        var employeeRow = editButton.closest('tr');
+        var employeeID = employeeRow.getAttribute('data-employee-id'); 
+        var employeeName = employeeRow.children[1].textContent;
+        var employeePosition = employeeRow.children[2].textContent;
+        var employeePhone = employeeRow.children[3].textContent;
+        var employeeEmail = employeeRow.children[4].textContent;
+        var employeeID = employeeRow.getAttribute('data-employee-id'); 
+        document.getElementById('employeeID').value = employeeID;
+        modal.style.display = "block";
+
+        document.getElementById('employeeID').value = employeeID;
+        document.getElementById('employeeName').value = employeeName;
+        document.getElementById('employeePosition').value = employeePosition;
+        document.getElementById('employeePhone').value = employeePhone;
+        document.getElementById('employeeEmail').value = employeeEmail;
+
+        document.getElementById('saveEmployee').addEventListener('click', function() {
+        var employeeID = employeeRow.children[0].textContent;
+        console.log(employeeID);
+        const employeeData = {
+            name: document.getElementById('employeeName').value,
+            position: document.getElementById('employeePosition').value,
+            phone: document.getElementById('employeePhone').value,
+            email: document.getElementById('employeeEmail').value
+        };
+        fetch(`http://localhost:3300/editEmployee/${employeeID}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(employeeData),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text();
+        })
+        .then(() => {
+            console.log('Employee updated successfully');
+
+            modal.style.display = "none";
+
+            location.reload();
+        })
+        .catch((error) => {
+            console.error('There was a problem with your fetch operation:', error);
+        });
+});
+    }
+
+
+    if (e.target.matches('.delete, .delete *')) {
+ 
+        var deleteButton = e.target.closest('.delete');
+        console.log('Delete button clicked');
+
+        var employeeRow = deleteButton.closest('tr');
+        var employeeID = employeeRow.children[0].textContent;
+        fetch(`http://localhost:3300/deleteEmployee/${employeeID}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text();
+        })
+        .then(() => {
+            console.log('Employee deleted successfully');
+
+            employeeRow.remove();
+        })
+        .catch((error) => {
+            console.error('There was a problem with your fetch operation:', error);
+        });
+    }
+
+});
+
+
+    span.onclick = function() {
+        modal.style.display = "none";
+    };
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    };
+
+
+    
+    console.log('DOM fully loaded and parsed');
+});
+
+</script>
+</html>

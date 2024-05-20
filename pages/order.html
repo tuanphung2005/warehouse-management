@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders page</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <style>
+        #side_bar a {
+            text-decoration: none;
+            color: white;
+        }
+        #side_bar a:hover {
+            color: white;
+            text-decoration: none;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid black;
+        }
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+        .rows div {
+            margin: 10px 0px 10px 0px;
+        }
+    </style>
+</head>
+<body>
+    <div id="wraper">
+        <div id="side_bar">
+            <table>
+                <ul>
+                    <li><a href="employee.html">Employee</a></li>
+                    <li><a href="customer.html">Customer</a></li>
+                    <li><a href="product.html">Product</a></li>
+                    <li><a href="order.html">Order</a></li>
+                    <li><a href="supplier.html">Supplier</a></li>
+                </ul>
+            </table>
+        </div>
+        <div id="content">
+            <div class="rows">
+                <h1>Orders</h1>
+                <div>
+                    <a class="btn btn-danger"><i class="material-icons">&#xE15C;</i></a>
+                    <a class="btn btn-success"><i class="material-icons">&#xE147;</i></a>
+                </div>
+            </div>
+            <span id="info">info!!!</span>
+        </div>
+    </div>
+<div id="orderModal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">order Details</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="orderForm">
+            <input type="hidden" id="orderID" name="orderID" value="">
+            <div class="form-group">
+              <label for="employeeID">Employee ID</label>
+              <input type="text" class="form-control" id="employeeID" placeholder="Enter employee ID">
+            </div>
+            <div class="form-group">
+              <label for="customerID">Customer ID</label>
+              <input type="text" class="form-control" id="customerID" placeholder="Enter customer ID">
+            </div>
+            <div class="form-group">
+              <label for="status">Status</label>
+              <input type="text" class="form-control" id="status" placeholder="Enter status">
+            </div>
+            <div class="form-group">
+                <label for="totalAmount">Total amount</label>
+                <input type="number" class="form-control" id="totalAmount" placeholder="Enter total amount">
+            </div>
+            <div class="form-group">
+                <label for="orderDate">Order date</label>
+                <input type="date" class="form-control" id="orderDate" placeholder="Enter order date">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="saveorder">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+<script>
+    fetch('http://localhost:3300/getorder')
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('Network response was not ok.');
+        })
+        .then(data => {
+            let tableHTML = "<table><tr><th>Order ID</th><th>Employee ID</th><th>Customer ID</th><th>Status</th><th>Total amount</th><th>Order Date</th><th>Actions</th></tr>";
+            data.forEach(order => {
+                tableHTML += `<tr>
+                    <td>${order.OrderID}</td>
+                    <td>${order.EmployeeID}</td>
+                    <td>${order.CustomerID}</td>
+                    <td>${order.Status}</td>
+                    <td>${order.TotalAmount}</td>
+                    <td>${order.OrderDate}</td>
+                    <td>
+                        <a class="edit"><i class="material-icons" title="Edit">&#xE254;</i></a>
+                        <a class="delete"><i class="material-icons" title="Delete">&#xE872;</i></a>
+                    </td>
+                </tr>`;
+            });
+            tableHTML += "</table>";
+            document.getElementById('info').innerHTML = tableHTML;
+        })
+        .catch(error => {
+            console.error("There was a problem with your fetch operation:", error);
+        });
+
+    document.addEventListener('DOMContentLoaded', function() {
+    var modal = document.getElementById('orderModal');
+    var btnAdd = document.querySelector('.btn-success');
+    var span = document.getElementsByClassName("close")[0];
+
+    btnAdd.onclick = function() {
+        modal.style.display = "block";
+        document.getElementById('saveorder').addEventListener('click', function() {
+        const orderData = {
+            employeeid: document.getElementById('employeeID').value,
+            customerid: document.getElementById('customerID').value,
+            status: document.getElementById('status').value,
+            totalamount: document.getElementById('totalAmount').value,
+            orderdate: document.getElementById('orderDate').value
+        };
+
+        fetch('http://localhost:3300/addorder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(orderData),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text();
+        })
+        .then(() => {
+            console.log('order added successfully');
+            location.reload();
+        })
+        .catch((error) => {
+            console.error('There was a problem with your fetch operation:', error);
+        });
+        });
+    };
+
+    
+    document.getElementById('info').addEventListener('click', function(e) {
+    if (e.target.matches('.edit, .edit *')) {
+        var editButton = e.target.closest('.edit');
+        console.log('Edit button clicked');
+
+        var orderRow = editButton.closest('tr');
+        var orderID = orderRow.getAttribute('data-order-id');
+        var employeeID = orderRow.children[1].textContent;
+        var customerID = orderRow.children[2].textContent;
+        var status = orderRow.children[3].textContent;
+        var totalAmount = orderRow.children[4].textContent;
+        var orderDate = orderRow.children[5].textContent;
+        var orderID = orderRow.getAttribute('data-order-id'); 
+        document.getElementById('orderID').value = orderID;
+        modal.style.display = "block";
+        document.getElementById('orderID').value = orderID;
+        document.getElementById('employeeID').value = employeeID;
+        document.getElementById('customerID').value = customerID;
+        document.getElementById('status').value = status;
+        document.getElementById('totalAmount').value = totalAmount;
+        document.getElementById('orderDate').value = orderDate;
+
+        document.getElementById('saveorder').addEventListener('click', function() {
+        var orderID = orderRow.children[0].textContent;
+        console.log(orderID);
+        const orderData = {
+            employeeid: document.getElementById('employeeID').value,
+            customerid: document.getElementById('customerID').value,
+            status: document.getElementById('status').value,
+            totalamount: document.getElementById('totalAmount').value,
+            orderdate: document.getElementById('orderDate').value
+        };
+        fetch(`http://localhost:3300/editorder/${orderID}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(orderData),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text();
+        })
+        .then(() => {
+            console.log('order updated successfully');
+            modal.style.display = "none";
+            location.reload();
+        })
+        .catch((error) => {
+            console.error('There was a problem with your fetch operation:', error);
+        });
+});
+    }
+
+    if (e.target.matches('.delete, .delete *')) {
+        var deleteButton = e.target.closest('.delete');
+        console.log('Delete button clicked');
+        var orderRow = deleteButton.closest('tr');
+        var orderID = orderRow.children[0].textContent;
+        fetch(`http://localhost:3300/deleteorder/${orderID}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text();
+        })
+        .then(() => {
+            console.log('order deleted successfully');
+
+            orderRow.remove();
+        })
+        .catch((error) => {
+            console.error('There was a problem with your fetch operation:', error);
+        });
+    }
+
+});
+
+    span.onclick = function() {
+        modal.style.display = "none";
+    };
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    };
+
+
+    
+    console.log('DOM fully loaded and parsed');
+});
+
+</script>
+</html>

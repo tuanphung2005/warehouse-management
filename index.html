@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>product page</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <style>
+        #side_bar a {
+            text-decoration: none;
+            color: white;
+        }
+        #side_bar a:hover {
+            color: white;
+            text-decoration: none;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid black;
+        }
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+        .rows div {
+            margin: 10px 0px 10px 0px;
+        }
+    </style>
+</head>
+<body>
+    <div id="wraper">
+        <div id="side_bar">
+            <table>
+                <ul>
+                    <li><a href="pages/employee.html">Employees</a></li>
+                    <li><a href="">Customers</a></li>
+                    <li><a href="">Products</a></li>
+                    <li><a href="">Orders</a></li>
+                    <li><a href="">Suppliers</a></li>
+                </ul>
+            </table>
+        </div>
+        <div id="content">
+            <h1>Warehouse management GUI</h1>
+            <span id="info">Info will be here</span>
+        </div>
+    </div>
+</body>
+</html>
